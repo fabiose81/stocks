@@ -12,4 +12,4 @@ RUN pip install -r requeriments.txt
 
 COPY . .
 
-CMD ["python", "stock_analyse/consumer.py"]
+CMD ["python", "stock_analyse/kafka/consumer.py"]

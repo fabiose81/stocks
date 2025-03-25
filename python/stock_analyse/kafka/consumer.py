@@ -1,17 +1,21 @@
 from confluent_kafka import Consumer, KafkaError
-from analyse import analyse
 from producer import producer
 
 import os
 
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from analyse import analyse
+
 def consumer():
     conf = {
         'bootstrap.servers': os.environ['KAFKA_BOOTSTRAP_SERVER'],  
-        'group.id': os.environ['KAFKA_GROUP_ID'],      
+        'group.id': os.environ['KAFKA_GROUP_ID'],     
         'enable.auto.commit': os.environ['KAFKA_AUTO_COMMIT'],           
         'auto.offset.reset': os.environ['KAFKA_OFFSET_RESET']
     }
 
+    print(conf)
     consumer = Consumer(conf)
     consumer.subscribe([os.environ['KAFKA_TOPIC_CONSUMER']])
 

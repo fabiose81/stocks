@@ -2,13 +2,12 @@ FROM node
 
 WORKDIR /home/node/app
 
-COPY package*.json ./
+COPY stock_collect/package*.json ./
+COPY stock_collect/tsconfig.json ./
 
 RUN npm install
 
 COPY . .
-
-EXPOSE 8080
 
 RUN npx tsc
 

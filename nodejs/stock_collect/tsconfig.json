@@ -1,11 +1,13 @@
 {
   "compilerOptions":{
-     "module":"commonjs",
+     "module":"es6",
      "esModuleInterop":true,
-     "target":"es6",
+     "target":"es2022",
      "moduleResolution":"node",
      "sourceMap":true,
-     "outDir":"dist"
+     "rootDirs": ["src"],
+     "outDir":"dist",
+     "types": ["node"]
   },
   "lib":[
      "es2015"
