@@ -70,6 +70,18 @@ services:
     networks:
       - broker-kafka
 
+  dashboard:
+    container_name: dashboard
+    build: 
+      context: ./reactjs
+      dockerfile: Dockerfile
+    ports:
+      - "9000:3000"
+    depends_on:
+      - collect
+    networks:
+      - broker-kafka
+
 networks:
   broker-kafka:
     driver: bridge
