@@ -57,6 +57,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    env_file:
+      - ./nodejs/stock_collect/variables.env
     environment:
       KAFKA_BOOTSTRAP_SERVER: kafka:9092
       KAFKA_GROUP_ID: group_2
@@ -70,17 +72,17 @@ services:
     networks:
       - broker-kafka
 
-  dashboard:
-    container_name: dashboard
-    build: 
-      context: ./reactjs
-      dockerfile: Dockerfile
-    ports:
-      - "9000:3000"
-    depends_on:
-      - collect
-    networks:
-      - broker-kafka
+  # dashboard:
+  #   container_name: dashboard
+  #   build: 
+  #     context: ./reactjs
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "9000:3000"
+  #   depends_on:
+  #     - collect
+  #   networks:
+  #     - broker-kafka
 
 networks:
   broker-kafka:

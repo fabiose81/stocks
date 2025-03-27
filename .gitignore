@@ -4,6 +4,7 @@ dist-ssr
 *.local
 __pycache__/
 package-lock.json
+*.env
 
 # Logs
 logs

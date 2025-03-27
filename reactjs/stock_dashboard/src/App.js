@@ -1,23 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
+// import Button from 'react-bootstrap/Button';
+import React, { useState, useCallback, useEffect } from 'react';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 
-function App() {
+const App = () => {
+
+  // const handleClickChangeSocketUrl = useCallback(
+  //   () => setSocketUrl('ws://demos.kaazing.com/echo'),
+  //   []
+  // );
+
+  // handleClickChangeSocketUrl = () => {
+  //   console.log('You clicked submit.');
+  // }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <button>
+        Click Me to change Socket Url
+      </button>
     </div>
   );
 }
