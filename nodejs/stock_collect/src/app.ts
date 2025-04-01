@@ -1,25 +1,20 @@
-import { ConsumerFactory } from './kafka/consumerFactory.js';
-import { Sender } from './websocket/sender.js';
-import { Collector } from './chatgpt/collector.js';
-import express from 'express';
+import express, { Express } from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors'
+import { ConsumerFactory } from './kafka/consumerFactory.js';
+import addRoutes from './router.js';
 
 dotenv.config();
 
-const port = process.env.HTTP_PORT;
-const app = express();
+const port = process.env.PORT;
+const app: Express = express();
+
+app.use(cors());
+
+addRoutes(app);
 
 const consumer = new ConsumerFactory();
 consumer.run();
-
-// const sender = new Sender();
-// sender.connect();
-
-app.get('/', (req, res) => {
-    const collector = new Collector();
-    collector.search();
-    res.send('Working in progress...');
-});
 
 app.listen(port, () => {
   return console.log(`Express is listening at http://localhost:${port}`);

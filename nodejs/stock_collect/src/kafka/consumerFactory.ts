@@ -1,5 +1,7 @@
 import { Consumer } from 'kafkajs'
 import { ConfigKafka } from './configKafka.js';
+import { Singleton } from "../singleton.js";
+import { Stock } from "../dto/stock.js";
 
 export class ConsumerFactory {
 
@@ -18,12 +20,8 @@ export class ConsumerFactory {
         
         await this.consumer.run({
           eachMessage: async ({ message }) => {
-            console.log({
-              value: message.key.toString(),
-            })
-            console.log({
-              value: message.value.toString(),
-            })
+            const stock = new Stock(message.key.toString(), JSON.parse(message.value.toString()));
+            Singleton.getInstance().getStocks().push(stock);
           },
         })
     }

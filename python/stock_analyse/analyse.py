@@ -16,4 +16,4 @@ def feature_extraction(hist):
     hist['Day'] = hist['Date'].dt.day
     hist['Month'] = hist['Date'].dt.month
     hist['Year'] = hist['Date'].dt.year
-    hist['Rentabilidade'] = hist['Close'] / hist['Close'].shift() * 100 - 100
+    hist['Profitability'] = hist['Close'] / hist['Close'].shift() * 100 - 100

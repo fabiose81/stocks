@@ -56,7 +56,7 @@ services:
       context: ./nodejs
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "4000:4000"
     env_file:
       - ./nodejs/stock_collect/variables.env
     environment:
@@ -72,17 +72,17 @@ services:
     networks:
       - broker-kafka
 
-  # dashboard:
-  #   container_name: dashboard
-  #   build: 
-  #     context: ./reactjs
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "9000:3000"
-  #   depends_on:
-  #     - collect
-  #   networks:
-  #     - broker-kafka
+  dashboard:
+    container_name: dashboard
+    build: 
+      context: ./reactjs
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - collect
+    networks:
+      - broker-kafka
 
 networks:
   broker-kafka:

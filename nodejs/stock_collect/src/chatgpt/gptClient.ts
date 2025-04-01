@@ -1,10 +1,9 @@
 import { ProducerFactory } from '../kafka/producerFactory.js';
+import OpenAI from 'openai';
 
-import OpenAI from "openai";
-
-export class Collector {
+export class GptClient {
     
-    openAiClient : OpenAI
+    openAiClient: OpenAI
 
     constructor() {
         const apiKey = process.env.OPENAI_API_KEY;
