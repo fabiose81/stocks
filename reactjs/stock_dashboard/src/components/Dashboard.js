@@ -1,49 +1,66 @@
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Chart } from 'react-google-charts';
-import { Collect } from '../rest/Collect'
+import { Collect } from '../services/Collect'
+import './Dashboard.css'
 
 const Dashboard = () => {
 
-    var resultInterval;
-    var stockResult = [];
-
     const [alert, setAlert] = useState({
-        text: '',
+        className: 'alert alert-body',
+        label: '',
         hidden: true
     });
 
     const [button, setButton] = useState({
-        text: 'collect',
-        status: false
+        className: 'btn-primary btn button-body',
+        label: 'collect',
+        disabled: false
     });
 
+    const Constants = {
+        COLLECT: 'collect',
+        COLLECTING: 'collecting...',
+        ALERT_DANGER: ' alert-danger',
+        BUTTON_BLINK: ' button-blink',
+        EMPTY_STRING: ''
+    }
+
+    var resultInterval;
+    var stockResult = [];
+
+    const changeAlertState = (className, label, hidden) => {
+        return {
+            className: className,
+            label: label,
+            hidden: hidden
+        }
+    }
+
+    const changeButtonState = (className, label, disabled) => {
+        return {
+            className: className,
+            label: label,
+            disabled: disabled
+        }
+    }
+
     const collect = () => {
-        setAlert(previousState => {
-            return { ...previousState, text: '', hidden: true }
-        });
-        setButton(previousState => {
-            return { ...previousState, text: "collecting...", status: true }
-        });
+        setAlert(() => changeAlertState(alert.className.replace(Constants.ALERT_DANGER, Constants.EMPTY_STRING), Constants.EMPTY_STRING, true));
+        setButton(() => changeButtonState(button.className.concat(Constants.BUTTON_BLINK), Constants.COLLECTING, true));
 
         Collect('/collect')
             .then(result => {
                 if (result.status === 200) {
-                    resultInterval = setInterval(() => {
-                        check();
-                    }, 1000)
+                    check();
                 } else {
-                    setAlert(previousState => {
-                        return { ...previousState, text: result.message, hidden: false }
-                    });
-                    setButton(previousState => {
-                        return { ...previousState, text: "collect", status: false }
-                    });
+                    setAlert(() => changeAlertState(alert.className.concat(Constants.ALERT_DANGER), result.message, false));
+                    setButton(() => changeButtonState(button.className.replace(Constants.BUTTON_BLINK, Constants.EMPTY_STRING), Constants.COLLECT, false));
                 }
             });
     }
 
-    //todo error check
+    //todo refactory method
     const check = () => {
         Collect('/result')
             .then(result => {
@@ -65,39 +82,47 @@ const Dashboard = () => {
                             const chart = createRoot(
                                 document.getElementById('chart')
                             );
-                            chart.render(<Chart chartType="LineChart" data={stockResult} />);
+                            chart.render(<Chart chartType="LineChart" data={stockResult} options={{
+                                title: "Company Performance",
+                                legend: { position: "none" },
+                              }}/>);
 
-                            setButton(previousState => {
-                                return { ...previousState, text: "collect", status: false }
-                            });
+                            setButton(() => changeButtonState(button.className.replace(Constants.BUTTON_BLINK, Constants.EMPTY_STRING), Constants.COLLECT, false));
+                        } else {
+                            check();
                         }
                     } else {
                         clearInterval(resultInterval);
-                        setButton(previousState => {
-                            return { ...previousState, text: "collect", status: false }
-                        });
-                        setAlert(previousState => {
-                            return { ...previousState, text: result.message, hidden: false }
-                        });
+                        setAlert(() => changeAlertState(alert.className.concat(Constants.ALERT_DANGER), result.message, false));
+                        setButton(() => changeButtonState(button.className.replace(Constants.BUTTON_BLINK, Constants.EMPTY_STRING), Constants.COLLECT, false));
                     }
                 }
             });
     }
 
     return (
-        <>
-            <h1>Dashboard</h1>
-            <div className="alert alert-danger" role="alert" hidden={alert.hidden}>
-                {alert.text}
+        <div className="main text-center">
+            <div className="row">
+                <div className="col">
+                    <div className="p-3">
+                        <div className={alert.className} hidden={alert.hidden} role="alert">{alert.label}</div>
+                        <button className={button.className} onClick={collect} disabled={button.disabled}>{button.label}</button>
+                    </div>
+                </div>
             </div>
-            <button id="collectButton" type="button" className="btn btn-primary" onClick={collect} disabled={button.status}>
-                <span id="spinner" className="spinner-grow spinner-grow-sm" aria-hidden="true" hidden={!button.status}></span>
-                <span id="collectLabel" role="status">{button.text}</span>
-            </button>
-            <br />
+            <div className="row gy-5">
+                <div className="col-6">
+                    <div id="chart" className="p-3">
 
-            <div id="chart" className="py-10"></div>
-        </>
+                    </div>
+                </div>
+                <div className="col-6">
+                    {/* <div id="chart" className="p-3">
+                        
+                    </div> */}
+                </div>
+            </div>
+        </div>
     )
 }
 

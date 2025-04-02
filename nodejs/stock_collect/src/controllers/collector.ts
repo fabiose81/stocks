@@ -9,7 +9,7 @@ export default async function collect(req: Request, res: Response) {
         return res.json({
             status: 200,
             message: 'Collecting data...',
-        });
+        });     
     } catch (error: any) {
         return res.json({
             status: 500,

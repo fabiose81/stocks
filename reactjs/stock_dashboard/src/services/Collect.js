@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export  function Collect(service) {
+export function Collect(service) {
     let url = 'http://localhost:4000'.concat(service);
 
     return new Promise((resolve, reject) => {

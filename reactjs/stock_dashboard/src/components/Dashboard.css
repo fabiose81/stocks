@@ -1,0 +1,29 @@
+.main {  
+    margin: 2% 2% 2% 2%;
+    border-style: solid;
+    border-width: 1px 1px;
+    border-color: #dcdcdc;
+    align-items: center;
+    justify-content: center;
+}
+
+.alert-body {  
+    margin-left: 20%;
+    margin-right: 20%;
+}
+
+.button-body {  
+    margin: 0 auto;
+    display: block;
+    width: 200px;
+}
+
+.button-blink {
+    animation: blink 2s linear infinite;
+}
+  
+@keyframes blink {
+    50% {
+      opacity: 0.3;
+    }
+}
