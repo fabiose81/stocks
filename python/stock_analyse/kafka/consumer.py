@@ -15,7 +15,6 @@ def consumer():
         'auto.offset.reset': os.environ['KAFKA_OFFSET_RESET']
     }
 
-    print(conf)
     consumer = Consumer(conf)
     consumer.subscribe([os.environ['KAFKA_TOPIC_CONSUMER']])
 
@@ -31,9 +30,12 @@ def consumer():
                 elif msg.error():
                     print(msg.error()) 
             else:
-                stock = msg.value().decode('utf-8')
-                print('Received message: {0}'.format(stock))
-                result = analyse(stock)
+                value = msg.value().decode('utf-8')
+                stock = value.split(':')[0]
+                period = value.split(':')[1]
+                interval = value.split(':')[2]
+                print('Received message to stock {0} for {1} year(s) and interval by {2}'.format(stock, period, interval))
+                result = analyse(stock, period, interval)
                 producer(stock, result)
     finally:
         consumer.close()

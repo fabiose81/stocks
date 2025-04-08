@@ -50,6 +50,19 @@ services:
     networks:
       - broker-kafka
 
+  database:
+    image: mongo:latest
+    container_name: database
+    ports:
+      - "7017:27017"
+    networks:
+      - broker-kafka
+    restart: unless-stopped
+    env_file:
+      - ./nodejs/stock_collect/variables.env
+    volumes:
+       - ./mongodb/stock_data:/data/db
+
   collect:
     container_name: collect
     build: 
@@ -57,6 +70,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4000:4000"
+      - "8080:8080"
     env_file:
       - ./nodejs/stock_collect/variables.env
     environment:
@@ -64,11 +78,12 @@ services:
       KAFKA_GROUP_ID: group_2
       KAFKA_TOPIC_PRODUCER: stock_analyse
       KAFKA_TOPIC_CONSUMER: stock_analyse_result
-      KAFKA_AUTO_COMMIT: true
+      KAFKA_AUTO_COMMIT: false
       KAFKA_OFFSET_RESET: smallest
       KAFKA_SUBSCRIBE_FROM_BEGINNING: true
     depends_on:
       - kafka
+      - database
     networks:
       - broker-kafka
 
@@ -84,6 +99,7 @@ services:
     networks:
       - broker-kafka
 
+#to-do change network's name
 networks:
   broker-kafka:
     driver: bridge

@@ -10,16 +10,15 @@ export class ProducerFactory {
         this.producer = kafka.producer()        
     }
 
-    async send(stock: string) {
+    async send(stock: string, period: string, interval: string) {
         await this.producer.connect()
         try {
-            const response = await this.producer.send({
+            await this.producer.send({
                 topic: process.env.KAFKA_TOPIC_PRODUCER,
                 messages: [
-                    { value: stock },
+                    { value: stock + ':' + period + ':' + interval },
                 ],
             })
-            console.log('Published message', { response })
         } catch (error) {
             console.error('Error publishing message', error)
         }
