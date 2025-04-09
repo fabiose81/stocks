@@ -41,6 +41,7 @@ async function main() {
       const consumer = new ConsumerFactory();
       consumer.run();
 
+      //to-do check this method
       initSingleton();
     }).catch(error => console.log(error));
 }

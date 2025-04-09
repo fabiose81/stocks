@@ -10,14 +10,14 @@ services:
     ports:
       - "22181:2181"
     networks:
-      - broker-kafka
+      - stocks
   kafka: 
     image: confluentinc/cp-kafka:7.4.4
     container_name: kafka
     ports:
       - "29092:29092"
     networks:
-      - broker-kafka
+      - stocks
     depends_on:
       - zookeeper
     environment:
@@ -48,7 +48,7 @@ services:
     depends_on:
       - kafka
     networks:
-      - broker-kafka
+      - stocks
 
   database:
     image: mongo:latest
@@ -56,7 +56,7 @@ services:
     ports:
       - "7017:27017"
     networks:
-      - broker-kafka
+      - stocks
     restart: unless-stopped
     env_file:
       - ./nodejs/stock_collect/variables.env
@@ -71,8 +71,10 @@ services:
     ports:
       - "4000:4000"
       - "8080:8080"
+      #to-do verify env_file's name
     env_file:
       - ./nodejs/stock_collect/variables.env
+      #to-do add var in another file
     environment:
       KAFKA_BOOTSTRAP_SERVER: kafka:9092
       KAFKA_GROUP_ID: group_2
@@ -85,7 +87,7 @@ services:
       - kafka
       - database
     networks:
-      - broker-kafka
+      - stocks
 
   dashboard:
     container_name: dashboard
@@ -97,9 +99,8 @@ services:
     depends_on:
       - collect
     networks:
-      - broker-kafka
+      - stocks
 
-#to-do change network's name
 networks:
-  broker-kafka:
+  stocks:
     driver: bridge

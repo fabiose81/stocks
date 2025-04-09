@@ -16,7 +16,7 @@ export class Sender {
       Singleton.getInstance().setWebSocket(ws);
 
       //to-do check if there is message on stack
-      console.log('New client connected ');
+      console.log('Client connected ');
       
       ws.on('message', (message) => {
         const jSonMessage = JSON.parse(message)
@@ -40,5 +40,4 @@ export class Sender {
       console.log('Client disconnected');
     });
   }
-
 }

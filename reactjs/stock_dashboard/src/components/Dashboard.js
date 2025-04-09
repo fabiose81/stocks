@@ -1,6 +1,5 @@
-import { useState,  Fragment } from 'react';
+import { useState, Fragment } from 'react';
 import { Chart } from 'react-google-charts';
-import { Collect } from '../services/Collect'
 import './Dashboard.css'
 
 const Dashboard = () => {
@@ -12,19 +11,23 @@ const Dashboard = () => {
         COLLECT: 'collect',
         COLLECTING: 'collecting...',
         ALERT_DANGER: ' alert-danger',
+        ALERT_SUCCESS: ' alert-success',
         BUTTON_BLINK: ' button-blink',
-        EMPTY_STRING: ''
+        EMPTY_STRING: '',
+        EVENT_COMPLETED: 'COMPLETED',
+        EVENT_GPT_ERROR: 'GPT_ERROR',
+        EVENT_ERROR: 'ERROR'
     }
 
     const [alert, setAlert] = useState({
         className: 'alert alert-body',
-        label: '',
+        label: Constants.EMPTY_STRING,
         hidden: true
     });
 
     const [button, setButton] = useState({
         className: 'btn-primary btn button-body',
-        label: 'collect',
+        label: Constants.COLLECT,
         disabled: false
     });
 
@@ -60,8 +63,6 @@ const Dashboard = () => {
         }
 
         webSocket.onopen = () => {
-            console.log('Connected to server');
-
             listenMessageFromWS();
             checkConnection();
 
@@ -81,7 +82,6 @@ const Dashboard = () => {
     const closeConnectionWS = () => {
         webSocket.close();
         webSocket.onclose = () => {
-            console.log('Connection to server closed');
             setStatusWS({
                 connected: false
             });
@@ -101,37 +101,61 @@ const Dashboard = () => {
 
     const listenMessageFromWS = () => {
         webSocket.onmessage = (event) => {
-            if (event.data === 'COMPLETED') {
-                clearInterval(connectionInterval);
-                closeConnectionWS();
+            switch (event.data) {
+                case Constants.EVENT_COMPLETED: {
+                    clearInterval(connectionInterval);
+                    closeConnectionWS();
 
-                setCollectRequested({
-                    requested: false
-                });
-
-                setStatusWS({
-                    connected: false
-                });
-
-                setButton(() => changeButtonState(button.className.replace(Constants.BUTTON_BLINK, Constants.EMPTY_STRING), Constants.COLLECT, false));
-            } else if (event.data === 'GPT ERROR') {
-                sendCollect();
-            } else if (event.data === 'ERROR') {
-                //do nothing
-            } else {
-                const stock = JSON.parse(event.data);
-                const result = stock.stock.result;
-
-                if (result.length > 0) {
-                    const dataChart = [['Day', 'Profitability']];
-                    result.forEach(r => {
-                        const day = r.Day + '/' + r.Month + '/' + r.Year
-                        const data = [day, r.Profitability]
-                        dataChart.push(data);
+                    setCollectRequested({
+                        requested: false
                     });
 
-                    setChart(currInputs => [...currInputs, { g: dataChart }]);
+                    setStatusWS({
+                        connected: false
+                    });
+
                     setButton(() => changeButtonState(button.className.replace(Constants.BUTTON_BLINK, Constants.EMPTY_STRING), Constants.COLLECT, false));
+                    break;
+                }
+
+                case Constants.EVENT_GPT_ERROR: {
+                    sendCollect();
+                    break;
+                }
+
+                case Constants.EVENT_ERROR: {
+                    closeConnectionWS();
+                    clearInterval(connectionInterval);
+                    setAlert(() => changeAlertState(alert.className.concat(Constants.ALERT_DANGER), Constants.EVENT_ERROR, false));
+                    setButton(() => changeButtonState(button.className.replace(Constants.BUTTON_BLINK, Constants.EMPTY_STRING), Constants.COLLECT, false));
+                    break;
+                }
+
+                default: {
+                    const stock = JSON.parse(event.data);
+                    const category = stock.category;
+                    const result = stock.result;
+
+                    if (result.length > 0) {
+                        const dataChart = [['Day', 'Profitability']];
+                        result.forEach(r => {
+                            const day = r.Month + '/' + r.Year
+                            const data = [day, r.Profitability]
+                            dataChart.push(data);
+                        });
+
+                        setChart(currInputs => [...currInputs,
+                        {
+                            category: category.name,
+                            code: stock.code,
+                            name: stock.name,
+                        },
+                        {
+
+                            data: dataChart
+                        }
+                        ]);
+                    }
                 }
             }
         };
@@ -146,50 +170,36 @@ const Dashboard = () => {
         webSocket.send(message);
     }
 
+    const collect = () => {
+        setButton(() => changeButtonState(button.className.concat(Constants.BUTTON_BLINK), Constants.COLLECTING, true));
+        setAlert(() => changeAlertState(alert.className.replace(Constants.ALERT_DANGER, Constants.EMPTY_STRING), Constants.EMPTY_STRING, true));
+        setChart([]);
+        openConnectionToWS();
+    }
+
     const ChartFragment = (props) => {
         return (
             <Fragment>
                 <div className="row gy-5">
                     <div className="col-6">
                         <div className="p-6">
-                            <Chart chartType="LineChart" data={chart[props.index].g} options={{
-                                title: "Company Performance",
-                                legend: { position: "none" },
-                            }} />
+                            <Chart className={(chart.length - 1) === props.index ? 'li-fade-out' : ''}
+                                chartType="LineChart" data={chart[props.index].data}
+                                options={{
+                                    title: "Company Performance",
+                                    legend: { position: "none" },
+                                }} />
+                        </div>
+                    </div>
+                    <div className="col-6">
+                        <div className="p-6">
+                            <h3>{props.category}</h3>
+                            <h4>{props.code} - {props.name}</h4>
                         </div>
                     </div>
                 </div>
             </Fragment>
         );
-    }
-
-
-    const collect = () => {
-        setButton(() => changeButtonState(button.className.concat(Constants.BUTTON_BLINK), Constants.COLLECTING, true));
-        openConnectionToWS();
-
-        //    Collect('/collect').then(result => {
-        //     // if (result.status === 200) {
-        //     //     // check();
-        //     // } else {
-        //     //     setAlert(() => changeAlertState(alert.className.concat(Constants.ALERT_DANGER), result.message, false));
-        //     //     setButton(() => changeButtonState(button.className.replace(Constants.BUTTON_BLINK, Constants.EMPTY_STRING), Constants.COLLECT, false));
-        //     // }
-        // });
-
-
-        // setAlert(() => changeAlertState(alert.className.replace(Constants.ALERT_DANGER, Constants.EMPTY_STRING), Constants.EMPTY_STRING, true));
-        // 
-
-
-        // Collect('/collect/', params).then(result => {
-        //     if (result.status === 200) {
-        //         // check();
-        //     } else {
-        //         setAlert(() => changeAlertState(alert.className.concat(Constants.ALERT_DANGER), result.message, false));
-        //         setButton(() => changeButtonState(button.className.replace(Constants.BUTTON_BLINK, Constants.EMPTY_STRING), Constants.COLLECT, false));
-        //     }
-        // });
     }
 
     return (
@@ -205,7 +215,7 @@ const Dashboard = () => {
             <div id="chart">
                 <ul style={{ listStyle: "none" }}>
                     <li>
-                        {chart.map((num, index) => <ChartFragment index={index} />)}
+                        {chart.map((val, index) => <ChartFragment category={val.category} code={val.code} name={val.name} index={index} />)}
                     </li>
                 </ul>
             </div>

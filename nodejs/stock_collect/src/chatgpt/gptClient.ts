@@ -63,7 +63,7 @@ export class GptClient {
         } catch (error) {
             const webSocket = Singleton.getInstance().getWebSocket();
             if (webSocket) {
-                webSocket.send('GPT ERROR')
+                webSocket.send('GPT_ERROR')
             }
             console.error(error);
         }

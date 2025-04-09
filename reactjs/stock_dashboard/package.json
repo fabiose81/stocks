@@ -9,8 +9,9 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.8.4",
     "bootstrap": "^5.3.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "motion": "^12.6.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "react-google-charts": "^5.2.1",
     "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"

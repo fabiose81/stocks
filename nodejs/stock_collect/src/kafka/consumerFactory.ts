@@ -2,6 +2,8 @@ import { Consumer } from 'kafkajs'
 import { ConfigKafka } from './configKafka.js';
 import { Singleton } from "../singleton.js";
 import StockModel from '../database/model/stock.model.js';
+import { StockDto } from '../dto/stock.dto.js';
+import { CategoryDto } from '../dto/category.dto.js';
 
 export class ConsumerFactory {
 
@@ -24,46 +26,49 @@ export class ConsumerFactory {
           const webSocket = Singleton.getInstance().getWebSocket();
 
           if (webSocket && message) {
-              const key = message.key.toString();
-              const value = message.value.toString();
-  
-              //to-do check here       
-              if (value === 'ERROR') {
-                webSocket.send(value)
-                console.error('We have an error for stock code ', key)
-              } else {
-                //to-do create method in util class
-                var result = JSON.parse(value);
-  
-                const filter = {
-                  'stock.code': {
-                    '$eq': key
-                  }
-                };
-  
-                const update = {
-                  'stock.result': result
-                };
-  
-                await StockModel.findOneAndUpdate(filter, update);
+            const key = message.key.toString();
+            const value = message.value.toString();
 
-                const stock = await StockModel.findOne(filter);
+            //to-do check here       
+            if (value === 'ERROR') {
+              webSocket.send(value)
+              console.error('We have an error for stock code ', key)
+            } else {
+              //to-do create method in util class
+              var result = JSON.parse(value);
 
-                //to-do convert JSON.stringify(stock) to dto 
-                webSocket.send(JSON.stringify(stock));
+              const filter = {
+                'stock.code': {
+                  '$eq': key
+                }
+              };
 
-                await StockModel.findOneAndDelete(filter, update);
-              }
+              const update = {
+                'stock.result': result
+              };
 
-              await this.consumer.commitOffsets([{ topic, partition, offset: (Number(message.offset) + 1).toString() }]);
-             
-              Singleton.getInstance().addStockSentByWS();
-              const totalNumberOfStocks = Singleton.getInstance().getTotalNumberOfStocks();
-              const stocksSentByWS = Singleton.getInstance().getStocksSentByWS();
-  
-              if (totalNumberOfStocks == stocksSentByWS) {
-                webSocket.send('COMPLETED')
-              }
+              await StockModel.findOneAndUpdate(filter, update);
+
+              const stock = await StockModel.findOne(filter); 
+
+              const categoryDto = new CategoryDto(stock.name, stock.numberOfStocks);
+              const stockDto = new StockDto(categoryDto, stock.stock.code, stock.stock.name, stock.stock.result);
+
+              webSocket.send(JSON.stringify(stockDto));
+
+              await StockModel.findOneAndDelete(filter, update);
+            }
+
+            await this.consumer.commitOffsets([{ topic, partition, offset: (Number(message.offset) + 1).toString() }]);
+
+            Singleton.getInstance().addStockSentByWS();
+            const totalNumberOfStocks = Singleton.getInstance().getTotalNumberOfStocks();
+            const stocksSentByWS = Singleton.getInstance().getStocksSentByWS();
+
+            //to-do check stocks in db with in kafka
+            if (totalNumberOfStocks == stocksSentByWS) {
+              webSocket.send('COMPLETED');
+            }
           } else {
             console.log('WebSocket not connected and/or kafka message is empty');
           }
