@@ -1,7 +1,6 @@
 import { Consumer } from 'kafkajs'
 import { ConfigKafka } from './configKafka.js';
 import { Singleton } from "../singleton.js";
-import { Sender } from '../websocket/sender.js'
 import StockModel from '../database/model/stock.model.js';
 
 export class ConsumerFactory {
@@ -74,9 +73,4 @@ export class ConsumerFactory {
       console.error(error);
     }
   }
-
-
-  // async aaa(filter, update) {
-  //   const stock = await StockModel.findOneAndUpdate(filter, update);
-  // }
 }

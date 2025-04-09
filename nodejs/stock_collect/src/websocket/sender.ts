@@ -18,10 +18,6 @@ export class Sender {
       //to-do check if there is message on stack
       console.log('New client connected ');
       
-      // Sending a message to the client
-      ws.send('Welcome to the WebSocket server!');
-
-
       ws.on('message', (message) => {
         const jSonMessage = JSON.parse(message)
         const period = jSonMessage.period;

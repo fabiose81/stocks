@@ -33,7 +33,7 @@ export class GptClient {
 
             var response = completion.choices[0].message.content;
 
-            //to-do criar metodo em classe utilitaria
+            // to-do criar metodo em classe utilitaria
             if (response) {
                 const producer = new ProducerFactory();
 
@@ -64,7 +64,7 @@ export class GptClient {
             const webSocket = Singleton.getInstance().getWebSocket();
             if (webSocket) {
                 webSocket.send('GPT ERROR')
-            }           
+            }
             console.error(error);
         }
     }

@@ -38,8 +38,8 @@ async function main() {
       const sender = new Sender();
       sender.connect();
 
-      // const consumer = new ConsumerFactory();
-      // consumer.run();
+      const consumer = new ConsumerFactory();
+      consumer.run();
 
       initSingleton();
     }).catch(error => console.log(error));
