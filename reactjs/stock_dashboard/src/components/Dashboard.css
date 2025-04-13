@@ -1,0 +1,42 @@
+.main {  
+    margin: 2% 2% 2% 2%;
+    align-items: center;
+    justify-content: center;
+}
+
+.alert-body {  
+    margin-left: 20%;
+    margin-right: 20%;
+}
+
+.button-body {  
+    margin: 0 auto;
+    display: block;
+    width: 200px;
+}
+
+.button-blink {
+    animation: blink 2s linear infinite;
+}
+  
+.li-fade-out {
+  animation: fade-out 0.5s ease-out;
+}
+
+@keyframes blink {
+    50% {
+      opacity: 0.3;
+    }
+}
+
+@keyframes fade-out {
+    0% {
+      opacity: 0;
+      display: block;
+    }
+  
+    100% {
+      opacity: 1;
+      display: none;
+    }
+  }
