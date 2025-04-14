@@ -12,6 +12,7 @@ const Dashboard = () => {
         COLLECT: 'collect',
         COLLECTING: 'collecting...',
         CONNECTION_CLOSED: 'Connection closed!',
+        DEFINE_PERIOD_INTERVAL: 'Define a Period and/or Interval!',
         ALERT_DANGER: ' alert-danger',
         ALERT_SUCCESS: ' alert-success',
         BUTTON_BLINK: ' button-blink',
@@ -20,6 +21,9 @@ const Dashboard = () => {
         EVENT_GPT_ERROR: 'GPT_ERROR',
         EVENT_ERROR: 'ERROR'
     }
+
+    const [period, setPeriod] = useState('');
+    const [interval, setInterval] = useState('');
 
     const [alert, setAlert] = useState({
         className: 'alert alert-body',
@@ -141,24 +145,22 @@ const Dashboard = () => {
                     stocks.forEach(stock => {
                         const category = stock.category;
                         const result = stock.result;
-                        console.log({
-                            category : category.name,
-                            code: stock.code,
-                            name: stock.name                                        
-                        })
 
-                        const dataChart = [['Day', 'Profitability']];
+                        const dataChartColumn = [['Day', 'Dividends', { role: "style" }]];
+                        const dataChartLine = [['Day', 'Profitability']];
                         result.forEach(r => {
-                            const day = r.Month + '/' + r.Year
-                            const data = [day, r.Profitability]
-                            dataChart.push(data);
+                            const day = (interval === '1d' ? r.Day + '/' : '') + r.Month + '/' + r.Year.toString()
+                            const color = (r.Dividends > 0 ? '#3cb371' : '#ff0000')
+                            const dataForColumn = [day, r.Dividends, color]
+                            const dataForLine = [day, r.Profitability]
+                            dataChartColumn.push(dataForColumn);
+                            dataChartLine.push(dataForLine);
                         });
 
                         data.push({
-                            category: category.name,
-                            code: stock.code,
-                            name: stock.name,
-                            data: dataChart
+                            title: stock.code + ' - ' + stock.name + ' [' + category.name + ']',
+                            dataChartColumn: dataChartColumn,
+                            dataChartLine: dataChartLine
                         })
                     });
                     setChart(data)
@@ -169,26 +171,35 @@ const Dashboard = () => {
 
     const sendCollect = () => {
         const message = JSON.stringify({
-            period: '1y',
-            interval: '1mo'
+            period: period,
+            interval: interval
         });
 
         webSocket.send(message);
     }
 
     const collect = () => {
-        setButton(() => changeButtonState(button.className.concat(Constants.BUTTON_BLINK), Constants.COLLECTING, true));
-        setAlert(() => changeAlertState(alert.className.replace(Constants.ALERT_DANGER, Constants.EMPTY_STRING), Constants.EMPTY_STRING, true));
-        setChart([]);
-        setVisibleChart([]);
-        index = 0;
-        openConnectionToWS();
+        if (period && interval) {
+            console.log({
+                period: period,
+                interval: interval
+            })
+            setButton(() => changeButtonState(button.className.concat(Constants.BUTTON_BLINK), Constants.COLLECTING, true));
+            setAlert(() => changeAlertState(alert.className.replace(Constants.ALERT_DANGER, Constants.EMPTY_STRING), Constants.EMPTY_STRING, true));
+            setChart([]);
+            setVisibleChart([]);
+            index = 0;
+            openConnectionToWS();
+        } else {
+            setAlert(() => changeAlertState(alert.className.concat(Constants.ALERT_DANGER), Constants.DEFINE_PERIOD_INTERVAL, false));
+        }
+
     }
-  
+
     useEffect(() => {
         if (chart.length > 0) {
             const i = setInterval(() => {
-                setVisibleChart((prev) =>   [...prev, chart[index++]]);
+                setVisibleChart((prev) => [...prev, chart[index++]]);
 
                 if (chart.length === index) {
                     clearInterval(i);
@@ -202,8 +213,43 @@ const Dashboard = () => {
         <div className="main text-center">
             <div className="row">
                 <div className="col">
+                    <div className={alert.className} hidden={alert.hidden} role="alert">{alert.label}</div>
+                </div>
+            </div>
+
+            <div className="row">
+                <div className="col">
+                    <div className="form-check form-check-inline">
+                        <label>Period: </label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                        <input className="form-check-input" type="radio" name="inlineRadioOptionsPeriod" id="inlineRadioOneYear" value="1y" onChange={e => setPeriod(e.target.value)} />
+                        <label className="form-check-label" htmlFor="inlineRadioOneYear">1 year</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                        <input className="form-check-input" type="radio" name="inlineRadioOptionsPeriod" id="inlineRadioThreeYear" value="3y" onChange={e => setPeriod(e.target.value)} />
+                        <label className="form-check-label" htmlFor="inlineRadioThreeYear">3 years</label>
+                    </div>
+                </div>
+
+                <div className="col">
+                    <div className="form-check form-check-inline">
+                        <label>Interval: </label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                        <input className="form-check-input" type="radio" name="inlineRadioOptionsInterval" id="inlineRadioByDay" value="1d" onChange={e => setInterval(e.target.value)} />
+                        <label className="form-check-label" htmlFor="inlineRadioByDay">By day</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                        <input className="form-check-input" type="radio" name="inlineRadioOptionsInterval" id="inlineRadioByMonth" value="1mo" onChange={e => setInterval(e.target.value)} />
+                        <label className="form-check-label" htmlFor="inlineRadioByMonth">By month</label>
+                    </div>
+                </div>
+            </div>
+
+            <div className="row">
+                <div className="col">
                     <div className="p-3">
-                        <div className={alert.className} hidden={alert.hidden} role="alert">{alert.label}</div>
                         <button className={button.className} onClick={collect} disabled={button.disabled}>{button.label}</button><br />
                     </div>
                 </div>
@@ -213,22 +259,27 @@ const Dashboard = () => {
                     {
                         visibleChart.map((item, index) => (
                             <li key={index} className="li-fade-out">
-                                <div className="row gy-5">
-                                    <div className="col-6">
-                                        <div className="p-6">
-                                            <Chart
-                                                chartType="LineChart" data={item.data}
-                                                options={{
-                                                    title: "Company Performance",
-                                                    legend: { position: "none" },
-                                                }} />
-                                        </div>
+                                <div className="row">
+                                    <div className="col">
+                                        <span>{item.title}</span>
                                     </div>
-                                    <div className="col-6">
-                                        <div className="p-6">
-                                            <h4>{item.category}</h4>
-                                            <h5>{item.code} - {item.name}</h5>
-                                        </div>
+                                </div>
+                                <div className="row row-cols-2 text-bg-light p-3">
+                                    <div className="col">
+                                        <Chart
+                                            chartType="ColumnChart" data={item.dataChartColumn}
+                                            options={{
+                                                legend: { position: "none" },
+                                                hAxis: { textPosition: 'none' }
+                                            }} />
+                                    </div>
+                                    <div className="col">
+                                        <Chart
+                                            chartType="LineChart" data={item.dataChartLine}
+                                            options={{
+                                                legend: { position: "none" },
+                                                hAxis: { textPosition: 'none' }
+                                            }} />
                                     </div>
                                 </div>
                             </li>

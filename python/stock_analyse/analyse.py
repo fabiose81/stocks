@@ -4,7 +4,7 @@ def analyse(stock, period, interval):
     try:
         ticker = yahooFinance.Ticker(stock)
         history = ticker.history(period=period, interval=interval)
-        history = history.drop(columns=['Open', 'High', 'Low', 'Volume', 'Dividends', 'Stock Splits'])
+        history = history.drop(columns=['Open', 'High', 'Low', 'Volume', 'Stock Splits'])
         history.shift()
         history.reset_index(inplace=True)
         feature_extraction(history)
