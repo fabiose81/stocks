@@ -14,6 +14,6 @@ export class DbConfig {
             .then(() => {
                 console.log('DataBase connected');
             })
-            .catch(error => console.log(error));
+            .catch(error => console.error(error));
     }
 }

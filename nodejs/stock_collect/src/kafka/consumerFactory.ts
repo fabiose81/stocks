@@ -57,7 +57,7 @@ export class ConsumerFactory {
               Singleton.getInstance().setTotalNumberOfStocks(0);
             }
           } else {
-            console.log('WebSocket not connected and/or kafka message is empty');
+            console.error('WebSocket not connected and/or kafka message is empty');
           }
         }
       })

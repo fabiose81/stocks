@@ -1,7 +1,5 @@
 import express, { Express } from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors';
-import addRoutes from './router.js';
 import { DbConfig } from './database/dbConfig.js';
 import { Sender } from './websocket/sender.js';
 import { ConsumerFactory } from './kafka/consumerFactory.js';
@@ -10,10 +8,6 @@ dotenv.config();
 
 const PORT = process.env.SERVER_PORT;
 const app: Express = express();
-
-app.use(cors());
-
-addRoutes(app);
 
 async function main() {
   const dbConfig = new DbConfig();
@@ -25,7 +19,7 @@ async function main() {
       const consumer = new ConsumerFactory();
       consumer.run();
 
-    }).catch(error => console.log(error));
+    }).catch(error => console.error(error));
 }
 
 app.listen(PORT, () => {

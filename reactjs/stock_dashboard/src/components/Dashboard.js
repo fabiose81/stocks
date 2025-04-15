@@ -23,7 +23,7 @@ const Dashboard = () => {
     }
 
     const [period, setPeriod] = useState('');
-    const [interval, setInterval] = useState('');
+    const [inter, setInter] = useState('');
 
     const [alert, setAlert] = useState({
         className: 'alert alert-body',
@@ -146,15 +146,17 @@ const Dashboard = () => {
                         const category = stock.category;
                         const result = stock.result;
 
-                        const dataChartColumn = [['Day', 'Dividends', { role: "style" }]];
+                        const dataChartColumn = [['Day', 'Dividends']];
                         const dataChartLine = [['Day', 'Profitability']];
                         result.forEach(r => {
-                            const day = (interval === '1d' ? r.Day + '/' : '') + r.Month + '/' + r.Year.toString()
-                            const color = (r.Dividends > 0 ? '#3cb371' : '#ff0000')
-                            const dataForColumn = [day, r.Dividends, color]
-                            const dataForLine = [day, r.Profitability]
-                            dataChartColumn.push(dataForColumn);
+                            const day = (inter === '1d' ? r.Day + '/' : '') + r.Month + '/' + r.Year;
+                            const dataForLine = [day, r.Profitability]                          
                             dataChartLine.push(dataForLine);
+
+                            if (r.Dividends > 0) {
+                                const dataForColumn = [day, r.Dividends]
+                                dataChartColumn.push(dataForColumn);
+                            }               
                         });
 
                         data.push({
@@ -172,18 +174,14 @@ const Dashboard = () => {
     const sendCollect = () => {
         const message = JSON.stringify({
             period: period,
-            interval: interval
+            interval: inter
         });
 
         webSocket.send(message);
     }
 
     const collect = () => {
-        if (period && interval) {
-            console.log({
-                period: period,
-                interval: interval
-            })
+        if (period && inter) {
             setButton(() => changeButtonState(button.className.concat(Constants.BUTTON_BLINK), Constants.COLLECTING, true));
             setAlert(() => changeAlertState(alert.className.replace(Constants.ALERT_DANGER, Constants.EMPTY_STRING), Constants.EMPTY_STRING, true));
             setChart([]);
@@ -193,7 +191,6 @@ const Dashboard = () => {
         } else {
             setAlert(() => changeAlertState(alert.className.concat(Constants.ALERT_DANGER), Constants.DEFINE_PERIOD_INTERVAL, false));
         }
-
     }
 
     useEffect(() => {
@@ -218,7 +215,8 @@ const Dashboard = () => {
             </div>
 
             <div className="row">
-                <div className="col">
+            <div className="col"></div> 
+                <div className="col-6 col-md-4">
                     <div className="form-check form-check-inline">
                         <label>Period: </label>
                     </div>
@@ -232,19 +230,20 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="col">
+                <div className="col-6 col-md-4">
                     <div className="form-check form-check-inline">
                         <label>Interval: </label>
                     </div>
                     <div className="form-check form-check-inline">
-                        <input className="form-check-input" type="radio" name="inlineRadioOptionsInterval" id="inlineRadioByDay" value="1d" onChange={e => setInterval(e.target.value)} />
+                        <input className="form-check-input" type="radio" name="inlineRadioOptionsInterval" id="inlineRadioByDay" value="1d" onChange={e => setInter(e.target.value)} />
                         <label className="form-check-label" htmlFor="inlineRadioByDay">By day</label>
                     </div>
                     <div className="form-check form-check-inline">
-                        <input className="form-check-input" type="radio" name="inlineRadioOptionsInterval" id="inlineRadioByMonth" value="1mo" onChange={e => setInterval(e.target.value)} />
+                        <input className="form-check-input" type="radio" name="inlineRadioOptionsInterval" id="inlineRadioByMonth" value="1mo" onChange={e => setInter(e.target.value)} />
                         <label className="form-check-label" htmlFor="inlineRadioByMonth">By month</label>
                     </div>
                 </div>
+                <div className="col"></div>
             </div>
 
             <div className="row">
@@ -266,18 +265,12 @@ const Dashboard = () => {
                                 </div>
                                 <div className="row row-cols-2 text-bg-light p-3">
                                     <div className="col">
-                                        <Chart
-                                            chartType="ColumnChart" data={item.dataChartColumn}
-                                            options={{
-                                                legend: { position: "none" },
-                                                hAxis: { textPosition: 'none' }
-                                            }} />
+                                        <Chart chartType="ColumnChart" data={item.dataChartColumn}/>
                                     </div>
                                     <div className="col">
                                         <Chart
                                             chartType="LineChart" data={item.dataChartLine}
                                             options={{
-                                                legend: { position: "none" },
                                                 hAxis: { textPosition: 'none' }
                                             }} />
                                     </div>
