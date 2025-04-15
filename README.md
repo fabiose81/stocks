@@ -1,4 +1,4 @@
-![alt text](https://github.com/fabiose81/stocks/blob/master/stock.jpg?raw=true)
+![alt text](https://github.com/fabiose81/stocks/blob/master/stocks.jpg?raw=true)
 
 
 
