@@ -1,3 +1,7 @@
+![alt text](https://github.com/fabiose81/stocks/blob/master/stock.jpg?raw=true)
+
+
+
 # In nodejs/stock_collect create the file .env and insert:
 
 SERVER_PORT = 4000 
