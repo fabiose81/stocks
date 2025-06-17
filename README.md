@@ -1,4 +1,4 @@
-https://github.com/user-attachments/assets/4b8a0206-e11a-48a9-8efe-262af4293e7e
+https://github.com/user-attachments/assets/b75edb1b-89d0-4e9b-b431-4e1ab2e9216a
 
 ![alt text](https://github.com/fabiose81/stocks/blob/master/stocks.jpg?raw=true)
 
