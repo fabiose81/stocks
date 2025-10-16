@@ -1,3 +1,13 @@
+# Company performance tracker
+
+  ⚙️ : Python, Node.js(TypeScript)
+  💻 : React(JavaScript)
+  🍃 : MongoDB
+  🛰️ : Kafka
+  🧠 : API OpenAI
+  🐳 : Docker
+
+
 https://github.com/user-attachments/assets/b75edb1b-89d0-4e9b-b431-4e1ab2e9216a
 
 ![alt text](https://github.com/fabiose81/stocks/blob/master/stocks.jpg?raw=true)
